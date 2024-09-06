@@ -140,6 +140,8 @@ spec:
         value: "v0.35.1"
       - name: "DOCKER_HOST"
         value: ""
+      - name: "SOURCE_SUBPATH"
+        value: "source"
       taskSpec:
         results:
         - description: "Image repository where the built image was pushed"

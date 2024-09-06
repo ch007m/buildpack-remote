@@ -153,6 +153,8 @@ spec:
       - name: "git-basic-auth"
         workspace: "git-auth"
     - name: "build-container"
+      runAfter:
+        - "prefetch-dependencies"
       params:
       - name: "PACK_SOURCE_DIR"
         value: "$(params.source-dir)"

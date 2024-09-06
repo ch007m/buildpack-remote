@@ -53,7 +53,7 @@ spec:
       - name: "pipelinerun-name"
         value: "$(context.pipelineRun.name)"
       - name: "git-url"
-        value: "$(tasks.clone-repository.results.url)?rev=$(tasks.clone-repository.results.commit)"
+        value: "$(tasks.git-clone.results.url)?rev=$(tasks.git-clone.results.commit)"
       - name: "image-url"
         value: "$(params.output-image)"
       - name: "build-task-status"
@@ -78,9 +78,9 @@ spec:
     - name: "BASE_IMAGES_DIGESTS"
       value: "$(tasks.build-container.results.BASE_IMAGES_DIGESTS)"
     - name: "CHAINS-GIT_URL"
-      value: "$(tasks.clone-repository.results.url)"
+      value: "$(tasks.git-clone.results.url)"
     - name: "CHAINS-GIT_COMMIT"
-      value: "$(tasks.clone-repository.results.commit)"
+      value: "$(tasks.git-clone.results.commit)"
     tasks:
     - name: "init"
       params:
@@ -182,7 +182,7 @@ spec:
       - name: "input"
         value: "$(params.prefetch-input)"
       runAfter:
-      - "clone-repository"
+      - "git-clone"
       taskRef:
         params:
         - name: "bundle"
@@ -202,7 +202,7 @@ spec:
       - name: "IMAGE"
         value: "$(params.output-image)"
       - name: "COMMIT_SHA"
-        value: "$(tasks.clone-repository.results.commit)"
+        value: "$(tasks.git-clone.results.commit)"
       - name: "IMAGE_EXPIRES_AFTER"
         value: "$(params.image-expires-after)"
       - name: "ALWAYS_BUILD_INDEX"

@@ -140,6 +140,8 @@ spec:
         value: "$(params.source-dir)"
       - name: "PACK_CLI_VERSION"
         value: "v0.35.1"
+      - name: "DOCKER_HOST"
+        value: ""
       runAfter:
       - "prefetch-dependencies"
       taskSpec:

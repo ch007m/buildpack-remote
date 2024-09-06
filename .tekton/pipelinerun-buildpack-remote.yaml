@@ -152,7 +152,7 @@ spec:
         workspace: "workspace"
       - name: "git-basic-auth"
         workspace: "git-auth"
-    - name: "build-container"
+    - name: "pack-remote"
       params:
       - name: "PACK_SOURCE_DIR"
         value: "$(params.source-dir)"
@@ -180,6 +180,14 @@ spec:
           script: |
             #!/usr/bin/env bash
             set -e
+            mkdir -p ~/.ssh
+            if [ -e "/ssh/error" ]; then
+              #no server could be provisioned
+              cat /ssh/error
+              exit 1
+            fi
+            export SSH_HOST=$(cat /ssh/host)
+            cp /ssh/id_rsa ~/.ssh
 
             echo "Installing pack ..."
             curl -sSL "https://github.com/buildpacks/pack/releases/download/$(params.PACK_CLI_VERSION)/pack-$(params.PACK_CLI_VERSION)-linux.tgz" | tar -C /usr/local/bin/ --no-same-owner -xzv pack

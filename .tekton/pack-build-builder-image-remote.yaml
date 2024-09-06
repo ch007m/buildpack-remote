@@ -14,7 +14,7 @@ metadata:
     appstudio.openshift.io/application: "buildpack-remote"
     pipelines.openshift.io/runtime: "java"
     pipelines.openshift.io/strategy: "remote-build"
-  name: buildpack-remote-on-push #name: "pack-build-builder-image-remote"
+  name: "pack-build-builder-image-remote"
   namespace: "cmoullia-tenant"
 spec:
   params:

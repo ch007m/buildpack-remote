@@ -45,7 +45,7 @@ spec:
     - "create"
     - "builder"
     - "--config"
-    - "$(workspaces.source.path)/$(params.SOURCE_SUBPATH)/builder.toml"
+    - "$(workspaces.source.path)/builder.toml"
   pipelineSpec:
     finally:
     - name: "show-sbom"

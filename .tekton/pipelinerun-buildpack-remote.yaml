@@ -33,6 +33,19 @@ spec:
     value: "false"
   - name: "prefetch-input"
     value: ""
+  - name: "source-dir"
+    value: "source"
+  - name: "imageUrl"
+    value: "buildpacksio/pack"
+  - name: "imageTag"
+    value: "latest"
+  - name: "packCmdBuilderFlags"
+    value:
+    - "builder"
+    - "create"
+    - "builder"
+    - "--config"
+    - "$(workspaces.source.path)/$(params.SOURCE_SUBPATH)/builder.toml"
   pipelineSpec:
     finally:
     - name: "show-sbom"

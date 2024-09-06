@@ -153,8 +153,6 @@ spec:
       - name: "git-basic-auth"
         workspace: "git-auth"
     - name: "build-container"
-      runAfter:
-        - "prefetch-dependencies"
       params:
       - name: "PACK_SOURCE_DIR"
         value: "$(params.source-dir)"
@@ -164,6 +162,8 @@ spec:
         value: ""
       - name: "SOURCE_SUBPATH"
         value: "source"
+      runAfter:
+      - "prefetch-dependencies"
       taskSpec:
         results:
         - description: "Image repository where the built image was pushed"

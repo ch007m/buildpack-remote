@@ -52,8 +52,6 @@ spec:
       params:
       - name: "IMAGE_URL"
         value: "$(tasks.build-container.results.IMAGE_URL)"
-      runAfter:
-      - ""
       taskRef:
         params:
         - name: "bundle"
@@ -73,8 +71,6 @@ spec:
         value: "$(params.output-image)"
       - name: "build-task-status"
         value: "$(tasks.build-container.status)"
-      runAfter:
-      - ""
       taskRef:
         params:
         - name: "bundle"
@@ -107,8 +103,6 @@ spec:
         value: "$(params.rebuild)"
       - name: "skip-checks"
         value: "$(params.skip-checks)"
-      runAfter:
-      - ""
       taskRef:
         params:
         - name: "bundle"
@@ -146,8 +140,6 @@ spec:
         value: "v0.35.1"
       - name: "DOCKER_HOST"
         value: ""
-      runAfter:
-      - ""
       taskSpec:
         results:
         - description: "Image repository where the built image was pushed"

@@ -6,7 +6,7 @@ metadata:
     build.appstudio.redhat.com/commit_sha: "{{revision}}"
     build.appstudio.redhat.com/target_branch: "{{target_branch}}"
     pipelinesascode.tekton.dev/max-keep-runs: "3"
-    pipelinesascode.tekton.dev/on-cel-expression: "event == 'push' && target_branch == 'custom'"
+    pipelinesascode.tekton.dev/on-cel-expression: "event == 'push' && target_branch == 'main'"
   labels:
     # pipelines.appstudio.openshift.io/type: "build"
     pipelines.openshift.io/used-by: "build-cloud"
@@ -14,7 +14,7 @@ metadata:
     appstudio.openshift.io/application: "buildpack-remote"
     pipelines.openshift.io/runtime: "java"
     pipelines.openshift.io/strategy: "remote-build"
-  name: "pack-build-builder-image-remote"
+  name: buildpack-remote-on-push #name: "pack-build-builder-image-remote"
   namespace: "cmoullia-tenant"
 spec:
   params:

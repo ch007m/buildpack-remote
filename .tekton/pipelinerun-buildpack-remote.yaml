@@ -76,7 +76,7 @@ spec:
         - name: "bundle"
           value: "quay.io/konflux-ci/tekton-catalog/task-summary:0.2"
         - name: "name"
-          value: "show-summary"
+          value: "summary"
         - name: "kind"
           value: "task"
         resolver: "bundles"

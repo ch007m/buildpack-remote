@@ -2,11 +2,19 @@ apiVersion: "tekton.dev/v1"
 kind: "PipelineRun"
 metadata:
   annotations:
+    build.appstudio.redhat.com/target_branch: "{{target_branch}}"
+    build.appstudio.redhat.com/commit_sha: "{{revision}}"
+    pipelinesascode.tekton.dev/on-cel-expression: "event == 'push' && target_branch\
+      \ == 'main'"
+    pipelinesascode.tekton.dev/max-keep-runs: "3"
     build.appstudio.openshift.io/repo: "https://github.com/paketo-community/builder-ubi-base?rev={{revision}}"
   labels:
     appstudio.openshift.io/application: "buildpack-remote"
-    appstudio.openshift.io/component: "buildpack-remote"
+    pipelines.appstudio.openshift.io/type: "build"
     pipelines.openshift.io/strategy: "remote-build"
+    appstudio.openshift.io/component: "buildpack-remote"
+    pipelines.openshift.io/used-by: "build-cloud"
+    pipelines.openshift.io/runtime: "java"
   name: "buildpack-remote"
   namespace: "cmoullia-tenant"
 spec:

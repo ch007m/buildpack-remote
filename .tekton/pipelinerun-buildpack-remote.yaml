@@ -61,7 +61,7 @@ spec:
         - name: "kind"
           value: "task"
         resolver: "bundles"
-    - name: "show-summary"
+    - name: "summary"
       params:
       - name: "pipelinerun-name"
         value: "$(context.pipelineRun.name)"

@@ -132,6 +132,26 @@ spec:
         workspace: "workspace"
       - name: "basic-auth"
         workspace: "git-auth"
+    - name: "prefetch-dependencies"
+      params:
+      - name: "input"
+        value: "$(params.prefetch-input)"
+      runAfter:
+      - "git-clone"
+      taskRef:
+        params:
+        - name: "bundle"
+          value: "quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies:0.1"
+        - name: "name"
+          value: "prefetch-dependencies"
+        - name: "kind"
+          value: "task"
+        resolver: "bundles"
+      workspaces:
+      - name: "source"
+        workspace: "workspace"
+      - name: "git-basic-auth"
+        workspace: "git-auth"
     - name: "build-container"
       params:
       - name: "PACK_SOURCE_DIR"
@@ -190,26 +210,6 @@ spec:
       workspaces:
       - name: "source"
         workspace: "workspace"
-    - name: "prefetch-dependencies"
-      params:
-      - name: "input"
-        value: "$(params.prefetch-input)"
-      runAfter:
-      - "git-clone"
-      taskRef:
-        params:
-        - name: "bundle"
-          value: "quay.io/konflux-ci/tekton-catalog/task-prefetch-dependencies:0.1"
-        - name: "name"
-          value: "prefetch-dependencies"
-        - name: "kind"
-          value: "task"
-        resolver: "bundles"
-      workspaces:
-      - name: "source"
-        workspace: "workspace"
-      - name: "git-basic-auth"
-        workspace: "git-auth"
     - name: "build-image-index"
       params:
       - name: "IMAGE"
@@ -296,7 +296,7 @@ spec:
       - name: "image-url"
         value: "$(tasks.build-container.results.IMAGE_URL)"
       runAfter:
-      - "build-container"
+      - "git-clone"
       taskRef:
         params:
         - name: "bundle"

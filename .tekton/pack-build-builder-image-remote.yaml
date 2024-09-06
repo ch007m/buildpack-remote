@@ -127,7 +127,7 @@ spec:
       - name: "PACK_CLI_VERSION"
         value: "v0.35.1"
       - name: "DOCKER_HOST"
-        value: "$(tasks.virtualmachine.results.ip)"
+        value: ""
       runAfter:
       - "prefetch-dependencies"
       taskSpec:

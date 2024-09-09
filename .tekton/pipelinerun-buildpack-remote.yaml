@@ -184,6 +184,7 @@ spec:
           script: |
             #!/usr/bin/env bash
             set -e
+            set -o verbose
             mkdir -p ~/.ssh
             if [ -e "/ssh/error" ]; then
               #no server could be provisioned
@@ -191,6 +192,9 @@ spec:
               exit 1
             fi
             export SSH_HOST=$(cat /ssh/host)
+            
+            ls -la /ssh
+            
             cp /ssh/id_rsa ~/.ssh
 
             chmod 0400 ~/.ssh/id_rsa

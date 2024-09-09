@@ -205,6 +205,14 @@ spec:
             
             echo "$BUILD_DIR"
             ssh $SSH_ARGS "$SSH_HOST"  mkdir -p "$BUILD_DIR/workspaces" "$BUILD_DIR/scripts" "$BUILD_DIR/volumes"
+            
+            cat >scripts/script-build.sh <<'REMOTESSHEOF'
+            #!/bin/sh
+            sudo podman pull quay.io/centos-bootc/centos-bootc:stream9
+            
+            REMOTESSHEOF
+            chmod +x scripts/script-build.sh
+            ssh $SSH_ARGS "$SSH_HOST" "bash -s" <scripts/script-build.sh
 
             echo -n "URL of the image build is : quarkus-hello:1.0" | tee "$(results.IMAGE_URL.path)"
             echo -n "sha256ddddddddddddddddddddd" | tee "$(results.IMAGE_DIGEST.path)"

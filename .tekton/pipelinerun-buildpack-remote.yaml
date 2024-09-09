@@ -34,7 +34,7 @@ spec:
   - name: "prefetch-input"
     value: ""
   - name: "PLATFORM"
-    value: "linux/x86_64"
+    value: "linux-mlarge/amd64"
   - name: "source-dir"
     value: "source"
   - name: "imageUrl"

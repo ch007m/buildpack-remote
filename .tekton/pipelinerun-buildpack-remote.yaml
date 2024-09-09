@@ -241,6 +241,10 @@ spec:
           - mountPath: /ssh
             name: ssh
             readOnly: true
+      volumes:
+        - name: "ssh"
+          secret:
+           secretName: "multi-platform-ssh-$(context.taskRun.name)"
       workspaces:
       - name: "source"
         workspace: "workspace"

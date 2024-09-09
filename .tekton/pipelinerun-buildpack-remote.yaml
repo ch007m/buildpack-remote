@@ -236,8 +236,8 @@ spec:
       workspaces:
       - name: "source"
         workspace: "workspace"
-      - name: "ssh2"
-        workspace: "ssh2"
+      #- name: "ssh2"
+      #  workspace: "ssh2"
     - name: "build-image-index"
       params:
       - name: "IMAGE"
@@ -387,6 +387,6 @@ spec:
   - name: "git-auth"
     secret:
       secretName: "{{ git_auth_secret }}"
-  - name: "ssh2"
-    secret:
-      secretName: "multi-platform-ssh-$(context.taskRun.name)"
+  #- name: "ssh2"
+  #  secret:
+  #    secretName: "multi-platform-ssh-$(context.taskRun.name)"

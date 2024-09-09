@@ -164,6 +164,8 @@ spec:
         value: ""
       - name: "SOURCE_SUBPATH"
         value: "."
+      - name: PLATFORM
+        value: "$(params.PLATFORM)"
       runAfter:
       - "prefetch-dependencies"
       taskSpec:

@@ -188,14 +188,14 @@ spec:
             set -o pipefail
             mkdir -p ~/.ssh
             if [ -e "/ssh/error" ]; then
-            #no server could be provisioned
-            cat /ssh/error
+              #no server could be provisioned
+              cat /ssh/error
             exit 1
             elif [ -e "/ssh/otp" ]; then
-            curl --cacert /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server) >~/.ssh/id_rsa
-            echo "" >> ~/.ssh/id_rsa
+              curl --cacert /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server) >~/.ssh/id_rsa
+              echo "" >> ~/.ssh/id_rsa
             else
-            cp /ssh/id_rsa ~/.ssh
+              cp /ssh/id_rsa ~/.ssh
             fi
             chmod 0400 ~/.ssh/id_rsa
             export SSH_HOST=$(cat /ssh/host)

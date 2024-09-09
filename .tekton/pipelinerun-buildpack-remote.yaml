@@ -199,54 +199,17 @@ spec:
             echo "$BUILD_DIR"
             ssh $SSH_ARGS "$SSH_HOST"  mkdir -p "$BUILD_DIR/workspaces" "$BUILD_DIR/scripts" "$BUILD_DIR/volumes"
 
-            ## TO BE REVIEWED ==>
-            echo "Installing pack ..."
-            curl -sSL "https://github.com/buildpacks/pack/releases/download/$(params.PACK_CLI_VERSION)/pack-$(params.PACK_CLI_VERSION)-linux.tgz" | tar -C /usr/local/bin/ --no-same-owner -xzv pack
-
-            echo "Checking pack ..."
-            pack --version
-            pack config experimental true
-
-            #export DOCKER_HOST=tcp://$(params.DOCKER_HOST):2376
-            #echo "DOCKER_HOST=tcp://$(params.DOCKER_HOST):2376"
-
-            # We cannot get the array from the params PACK_CMD_FLAGS within the bash script as substitution don't work in this case !!
-            echo "Getting the arguments ..."
-            for cmd_arg in "$@"; do
-              CLI_ARGS+=("$cmd_arg")
-            done
-
-            echo "Here are the arguments to be passed to the pack CLI"
-            for i in "$CLI_ARGS[@]"; do
-              echo "arg: $i"
-            done
-
-            echo "Building the builder image ..."
-            echo "pack ${CLI_ARGS[@]}"
-            pack "${CLI_ARGS[@]}"
-
             echo -n "URL of the image build is : quarkus-hello:1.0" | tee "$(results.IMAGE_URL.path)"
             echo -n "sha256ddddddddddddddddddddd" | tee "$(results.IMAGE_DIGEST.path)"
             echo -n "sha256eeeeeeeeeeeeeeeeeeeeee" | tee "$(results.BASE_IMAGES_DIGESTS.path)"
-        volumeMounts:
-          #- mountPath: /var/lib/containers
-          #  name: varlibcontainers
-          #- mountPath: /entitlement
-          #  name: etc-pki-entitlement
-          #- mountPath: /activation-key
-          #  name: activation-key
-          #- mountPath: /additional-secret
-          #  name: additional-secret
-          #- mountPath: /mnt/trusted-ca
-          #  name: trusted-ca
-          #  readOnly: true
-          - mountPath: /ssh
-            name: ssh
-            readOnly: true
-      volumes:
-        - name: "ssh"
-          secret:
-           secretName: "multi-platform-ssh-$(context.taskRun.name)"
+          volumeMounts:
+            - mountPath: /ssh
+              name: ssh
+              readOnly: true
+        volumes:
+          - name: "ssh"
+            secret:
+             secretName: "multi-platform-ssh-$(context.taskRun.name)"
       workspaces:
       - name: "source"
         workspace: "workspace"

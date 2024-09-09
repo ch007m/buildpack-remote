@@ -13,7 +13,7 @@ metadata:
     pipelines.appstudio.openshift.io/type: "build"
     pipelines.openshift.io/strategy: "remote-build"
     appstudio.openshift.io/component: "buildpack-remote"
-    pipelines.openshift.io/used-by: "build-cloud-1"
+    pipelines.openshift.io/used-by: "build-cloud"
     pipelines.openshift.io/runtime: "java"
   name: "buildpack-remote"
   namespace: "cmoullia-tenant"
@@ -177,46 +177,27 @@ spec:
           - "$(params.packCmdBuilderFlags)"
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
-          script: |
-            #!/usr/bin/env bash
-            set -e
-            mkdir -p ~/.ssh
-            if [ -e "/ssh/error" ]; then
-              #no server could be provisioned
-              cat /ssh/error
-              exit 1
-            fi
-            export SSH_HOST=$(cat /ssh/host)
-            cp /ssh/id_rsa ~/.ssh
-
-            echo "Installing pack ..."
-            curl -sSL "https://github.com/buildpacks/pack/releases/download/$(params.PACK_CLI_VERSION)/pack-$(params.PACK_CLI_VERSION)-linux.tgz" | tar -C /usr/local/bin/ --no-same-owner -xzv pack
-
-            echo "Checking pack ..."
-            pack --version
-            pack config experimental true
-
-            #export DOCKER_HOST=tcp://$(params.DOCKER_HOST):2376
-            #echo "DOCKER_HOST=tcp://$(params.DOCKER_HOST):2376"
-
-            # We cannot get the array from the params PACK_CMD_FLAGS within the bash script as substitution don't work in this case !!
-            echo "Getting the arguments ..."
-            for cmd_arg in "$@"; do
-              CLI_ARGS+=("$cmd_arg")
-            done
-
-            echo "Here are the arguments to be passed to the pack CLI"
-            for i in "$CLI_ARGS[@]"; do
-              echo "arg: $i"
-            done
-
-            echo "Building the builder image ..."
-            echo "pack ${CLI_ARGS[@]}"
-            pack "${CLI_ARGS[@]}"
-
-            echo -n "URL of the image build is : quarkus-hello:1.0" | tee "$(results.IMAGE_URL.path)"
-            echo -n "sha256ddddddddddddddddddddd" | tee "$(results.IMAGE_DIGEST.path)"
-            echo -n "sha256eeeeeeeeeeeeeeeeeeeeee" | tee "$(results.BASE_IMAGES_DIGESTS.path)"
+          script: "#!/usr/bin/env bash\nset -e\nmkdir -p ~/.ssh\nif [ -e \"/ssh/error\"\
+            \ ]; then\n  #no server could be provisioned\n  cat /ssh/error\n  exit\
+            \ 1\nfi\nexport SSH_HOST=$(cat /ssh/host)\ncp /ssh/id_rsa ~/.ssh\n\nchmod\
+            \ 0400 ~/.ssh/id_rsa\nexport BUILD_DIR=$(cat /ssh/user-dir)\nexport SSH_ARGS=\"\
+            -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10\"\
+            \necho \"$BUILD_DIR\"\nssh $SSH_ARGS \"$SSH_HOST\"  mkdir -p \"$BUILD_DIR/workspaces\"\
+            \ \"$BUILD_DIR/scripts\" \"$BUILD_DIR/volumes\"\n\n## TO BE REVIEWED ==>\
+            \ \necho \"Installing pack ...\"\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/$(params.PACK_CLI_VERSION)/pack-$(params.PACK_CLI_VERSION)-linux.tgz\"\
+            \ | tar -C /usr/local/bin/ --no-same-owner -xzv pack\n\necho \"Checking\
+            \ pack ...\"\npack --version\npack config experimental true\n\n#export\
+            \ DOCKER_HOST=tcp://$(params.DOCKER_HOST):2376\n#echo \"DOCKER_HOST=tcp://$(params.DOCKER_HOST):2376\"\
+            \n\n# We cannot get the array from the params PACK_CMD_FLAGS within the\
+            \ bash script as substitution don't work in this case !!\necho \"Getting\
+            \ the arguments ...\"\nfor cmd_arg in \"$@\"; do\n  CLI_ARGS+=(\"$cmd_arg\"\
+            )\ndone\n\necho \"Here are the arguments to be passed to the pack CLI\"\
+            \nfor i in \"$CLI_ARGS[@]\"; do\n  echo \"arg: $i\"\ndone\n\necho \"Building\
+            \ the builder image ...\"\necho \"pack ${CLI_ARGS[@]}\"\npack \"${CLI_ARGS[@]}\"\
+            \n\necho -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"\
+            $(results.IMAGE_URL.path)\"\necho -n \"sha256ddddddddddddddddddddd\" |\
+            \ tee \"$(results.IMAGE_DIGEST.path)\"\necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\"\
+            \ | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\n"
       workspaces:
       - name: "source"
         workspace: "workspace"

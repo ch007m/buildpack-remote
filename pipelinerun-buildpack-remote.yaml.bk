@@ -387,6 +387,6 @@ spec:
   - name: "git-auth"
     secret:
       secretName: "{{ git_auth_secret }}"
-  - name: "ssh2"
+  - name: ssh2
     secret:
-      secretName: "multi-platform-ssh-$(context.taskRun.name)"
+      secretName: multi-platform-ssh-$(context.taskRun.name)

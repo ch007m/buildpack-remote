@@ -207,9 +207,6 @@ spec:
             echo "List files under /ssh"
             ls -la /ssh
             
-            #echo "List files under /ssh2 mounted using a workspace
-            #ls -la $(workspaces.ssh2.path)/
-            
             echo "$BUILD_DIR"
             ssh $SSH_ARGS "$SSH_HOST"  mkdir -p "$BUILD_DIR/workspaces" "$BUILD_DIR/scripts" "$BUILD_DIR/volumes"
             

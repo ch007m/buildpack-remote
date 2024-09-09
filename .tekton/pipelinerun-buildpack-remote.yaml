@@ -209,6 +209,7 @@ spec:
             cat >scripts/script-build.sh <<'REMOTESSHEOF'
             #!/bin/sh
             sudo podman pull quay.io/centos-bootc/centos-bootc:stream9
+            podman version
             
             REMOTESSHEOF
             chmod +x scripts/script-build.sh

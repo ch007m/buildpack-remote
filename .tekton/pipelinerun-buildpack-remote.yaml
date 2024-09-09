@@ -238,8 +238,8 @@ spec:
       workspaces:
       - name: "source"
         workspace: "workspace"
-      #- name: "ssh2"
-      #  workspace: "ssh2"
+      - name: "ssh"
+        workspace: "ssh"
     - name: "build-image-index"
       params:
       - name: "IMAGE"

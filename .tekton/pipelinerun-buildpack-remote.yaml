@@ -144,7 +144,7 @@ spec:
       - name: "IMAGE"
         value: "$(params.output-image)"
       - name: "PLATFORM"
-        value: "linux-mlarge/amd64"
+        value: "linux-root/amd64"
       - name: "BUILDER_IMAGE"
         value: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
       - name: "PACK_CLI_VERSION"
@@ -188,10 +188,10 @@ spec:
             $HOME/buildpack-repo\"\n\nPACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
             \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\
             mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
-            \   \n\necho \"### Podman status ###\"\n# podman version\n# echo \"##\
+            \   \n\n#echo \"### Podman status ###\"\n# podman version\n# echo \"##\
             \ Status of the service ##\"\n# systemctl status podman.socket\n# systemctl\
-            \ --user start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
-            \ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
+            \ --user start podman.socket\n#systemctl status podman.socket\n#ls -la\
+            \ $XDG_RUNTIME_DIR/podman\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
             \ | tar -C ${TEMP_DIR} --no-same-owner -xzv pack\nmv ${TEMP_DIR}/pack\
             \ ${USER_BIN_DIR}\n\necho \"### Pack version ###\"\npack --version\npack\
             \ config experimental true   \n\necho \"### Go version ###\"\ncurl -sSL\
@@ -206,8 +206,8 @@ spec:
             \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\"$build_arg\"\
             )\ndone\n\necho \"Build arguments to be passed to the pack CLI\"\nfor\
             \ arg in \"${BUILD_ARGS[@]}\"; do\n  echo \"arg: $arg\"\ndone\n\n#set\
-            \ -o verbose\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
-            pack builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
+            \ -o verbose\nexport DOCKER_HOST=unix://var/run/podman/podman.sock\npack\
+            \ builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
             \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
             buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\n#set +o verbose\n\
             \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\nrsync -ra scripts\

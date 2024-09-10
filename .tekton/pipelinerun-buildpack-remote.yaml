@@ -220,17 +220,18 @@ spec:
             # delete symlinks - they may point outside the container rootfs, messing\
             \ with SBOM scanners\nfind $(cat /shared/container_path) -xtype l -delete\n\
             echo $container >/shared/container_name\n\npodman push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\
-            \n\n#container=$(buildah from --pull-never $IMAGE)\n#buildah mount $container\
-            \ | tee /shared/container_path\n#buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\
-            \nset +o verbose\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\n\
-            rsync -ra scripts \"$SSH_HOST:$BUILD_DIR\"\nrsync -ra \"$HOME/.docker/\"\
-            \ \"$SSH_HOST:$BUILD_DIR/.docker/\"\n\n# DON'T WORK AS DOCKER PACK CANNOT\
-            \ ACCESS DOCKER HOST\n# ssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD podman\
-            \ run $PODMAN_PORT_FORWARD \\\n#    -v \"$BUILD_DIR/scripts:/scripts:Z\"\
-            \ \\\n#    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\" \\\n#    -v \"$BUILD_DIR/volumes/shared:/shared:Z\"\
-            \ \\\n#    --user=0 --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\
-            \nssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\n\
-            echo -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
+            \nls -la \nls -la konflux-final-image\n\n#container=$(buildah from --pull-never\
+            \ $IMAGE)\n#buildah mount $container | tee /shared/container_path\n#buildah\
+            \ push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\nset +o verbose\n\
+            \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\nrsync -ra scripts\
+            \ \"$SSH_HOST:$BUILD_DIR\"\nrsync -ra \"$HOME/.docker/\" \"$SSH_HOST:$BUILD_DIR/.docker/\"\
+            \n\n# DON'T WORK AS DOCKER PACK CANNOT ACCESS DOCKER HOST\n# ssh $SSH_ARGS\
+            \ \"$SSH_HOST\" $PORT_FORWARD podman run $PODMAN_PORT_FORWARD \\\n#  \
+            \  -v \"$BUILD_DIR/scripts:/scripts:Z\" \\\n#    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\"\
+            \ \\\n#    -v \"$BUILD_DIR/volumes/shared:/shared:Z\" \\\n#    --user=0\
+            \ --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\nssh $SSH_ARGS \"\
+            $SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\necho -n \"URL of the\
+            \ image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
             \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
             \n\nrsync -ra \"$SSH_HOST:$BUILD_DIR/volumes/shared/\" /shared/\nrsync\

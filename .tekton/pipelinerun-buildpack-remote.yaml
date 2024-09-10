@@ -274,7 +274,7 @@ spec:
                 ls
   
                 export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-                pack builder create builder --config builder.toml
+                pack builder create builder --config builder.toml -vv
                 
                 REMOTESSHEOF
                 chmod +x scripts/script-build.sh

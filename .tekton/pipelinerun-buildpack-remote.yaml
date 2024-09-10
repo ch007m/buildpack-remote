@@ -169,7 +169,7 @@ spec:
           - "$(params.BUILD_ARGS)"
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
-          script: "#!/usr/bin/env bash\n# set -o verbose\nset -eu\nset -o pipefail\n\
+          script: "#!/usr/bin/env bash\nset -o verbose\nset -eu\nset -o pipefail\n\
             mkdir -p ~/.ssh\nif [ -e \"/ssh/error\" ]; then\n  #no server could be\
             \ provisioned\n  cat /ssh/error\nexit 1\nelif [ -e \"/ssh/otp\" ]; then\n\
             \  curl --cacert /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server)\
@@ -181,13 +181,14 @@ spec:
             ssh $SSH_ARGS \"$SSH_HOST\" mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\"\
             \ \"$BUILD_DIR/volumes\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
             #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
-            $HOME/buildpack-repo\"\nBUILDER_IMAGE=\"$(params.BUILDER_IMAGE)\"\n\n\
-            PACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\nGO_VERSION=\"1.23.0\"\
-            \n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\nmkdir -p ${BUILDPACK_PROJECTS}\n\
-            \nexport PATH=$PATH:${USER_BIN_DIR}     \n\necho \"### Podman status ###\"\
-            \npodman version\necho \"## Status of the service ##\"\nsystemctl status\
-            \ podman.socket\nsystemctl --user start podman.socket\nsystemctl status\
-            \ podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
+            $HOME/buildpack-repo\"\nBUILDER_IMAGE=\"$(params.BUILDER_IMAGE)\"\necho\
+            \ \"Builder image: $BUILDER_IMAGE\"\n\nPACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
+            \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\
+            mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
+            \   \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\
+            \ of the service ##\"\nsystemctl status podman.socket\nsystemctl --user\
+            \ start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
+            \ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
             \ | tar -C ${TEMP_DIR} --no-same-owner -xzv pack\nmv ${TEMP_DIR}/pack\
             \ ${USER_BIN_DIR}\n\necho \"### Pack version ###\"\npack --version\npack\
             \ config experimental true   \n\necho \"### Go version ###\"\ncurl -sSL\

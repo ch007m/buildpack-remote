@@ -227,7 +227,8 @@ spec:
             name: "ssh"
             readOnly: true
         volumes:
-        - secret:
+        - name: "ssh"
+          secret:
             secretName: "multi-platform-ssh-$(context.taskRun.name)"
       workspaces:
       - name: "source"
@@ -381,6 +382,3 @@ spec:
   - name: "git-auth"
     secret:
       secretName: "{{ git_auth_secret }}"
-  - name: "ssh"
-    secret:
-      secretName: "multi-platform-ssh-$(context.taskRun.name)"

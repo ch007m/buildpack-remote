@@ -224,6 +224,7 @@ spec:
                 USER_BIN_DIR="$HOME/bin"
                 
                 PACK_CLI_VERSION="v0.35.1"
+                GO_VERSION="1.23.0"
                 
                 mkdir -p ${TEMP_DIR}
                 mkdir -p ${USER_BIN_DIR}
@@ -241,7 +242,16 @@ spec:
                 podman version
                 
                 echo "### Go version ###"
-                go env => NOT INSTALLED
+                curl -sSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -C ${TEMP_DIR} -xzv go
+                mkdir -p ${USER_BIN_DIR}/go
+                mv ${TEMP_DIR}/go ${USER_BIN_DIR}
+                chmod +x ${USER_BIN_DIR}/go
+  
+                mkdir -p $HOME/workspace
+                export GOPATH=$HOME/workspace
+                export GOROOT=${USER_BIN_DIR}/go
+                export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+                go version
                 
                 # echo "### Git version ###"
                 # sudo yum install git => NOT ALLOWED

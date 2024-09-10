@@ -35,19 +35,6 @@ spec:
     value: "linux-mlarge/amd64"
   - name: "output-image"
     value: "quay.io/redhat-user-workloads/cmoullia-tenant/konflux-demo/buildpack-remote:{{revision}}"
-  - name: "source-dir"
-    value: "source"
-  - name: "imageUrl"
-    value: "buildpacksio/pack"
-  - name: "imageTag"
-    value: "latest"
-  - name: "packCmdBuilderFlags"
-    value:
-    - "builder"
-    - "create"
-    - "builder"
-    - "--config"
-    - "$(workspaces.source.path)/builder.toml"
   pipelineSpec:
     finally:
     - name: "show-sbom"
@@ -160,14 +147,15 @@ spec:
         value: "$(params.source-dir)"
       - name: "PACK_CLI_VERSION"
         value: "v0.35.1"
-      - name: "DOCKER_HOST"
-        value: ""
       - name: "SOURCE_SUBPATH"
         value: "."
       - name: "IMAGE"
         value: "$(params.output-image)"
       - name: "PLATFORM"
         value: "$(params.PLATFORM)"
+      - name: "BUILD_ARGS"
+        value:
+        - "-v"
       runAfter:
       - "prefetch-dependencies"
       taskSpec:
@@ -180,7 +168,7 @@ spec:
           name: "BASE_IMAGES_DIGESTS"
         steps:
         - args:
-          - "$(params.packCmdBuilderFlags)"
+          - "$(params.BUILD_ARGS[*])"
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
           script: "#!/usr/bin/env bash\n# set -o verbose\nset -eu\nset -o pipefail\n\
@@ -197,30 +185,29 @@ spec:
             #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
             $HOME/buildpack-repo\"\n\nPACK_CLI_VERSION=\"v0.35.1\"\nGO_VERSION=\"\
             1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\nmkdir -p ${BUILDPACK_PROJECTS}\n\
-            \nexport PATH=$PATH:${USER_BIN_DIR}\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
+            \nexport PATH=$PATH:${USER_BIN_DIR}     \n\necho \"### Podman status ###\"\
+            \npodman version\necho \"## Status of the service ##\"\nsystemctl status\
+            \ podman.socket\nsystemctl --user start podman.socket\nsystemctl status\
+            \ podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
             \ | tar -C ${TEMP_DIR} --no-same-owner -xzv pack\nmv ${TEMP_DIR}/pack\
             \ ${USER_BIN_DIR}\n\necho \"### Pack version ###\"\npack --version\npack\
-            \ config experimental true        \n\necho \"### Podman version ###\"\n\
-            podman version\npodman info\n\necho \"## Status of the service ##\"\n\
-            systemctl status podman.socket\nsystemctl --user start podman.socket\n\
-            systemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\necho\
-            \ \"### Go version ###\"\ncurl -sSL \"https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz\"\
-            \ | tar -C ${TEMP_DIR} -xz go\nmkdir -p ${USER_BIN_DIR}/go\nmv ${TEMP_DIR}/go\
-            \ ${USER_BIN_DIR}\nchmod +x ${USER_BIN_DIR}/go\n\nmkdir -p $HOME/workspace\n\
-            export GOPATH=$HOME/workspace\nexport GOROOT=${USER_BIN_DIR}/go\nexport\
-            \ PATH=$PATH:$GOROOT/bin:$GOPATH/bin\ngo version\n\n# echo \"### Git version\
-            \ ###\"\n# sudo yum install git => NOT ALLOWED\n# yum install git => This\
-            \ command has to be run with superuser privileges \n# git version\n\n\
-            echo \"### Build the builder image using pack\"\ncurl -sSL https://github.com/paketo-community/builder-ubi-base/tarball/main\
-            \ | tar -xz -C ${TEMP_DIR}\nmv ${TEMP_DIR}/paketo-community-builder-ubi-base-*\
+            \ config experimental true   \n\necho \"### Go version ###\"\ncurl -sSL\
+            \ \"https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz\" | tar -C ${TEMP_DIR}\
+            \ -xz go\nmkdir -p ${USER_BIN_DIR}/go\nmv ${TEMP_DIR}/go ${USER_BIN_DIR}\n\
+            chmod +x ${USER_BIN_DIR}/go\n\nmkdir -p $HOME/workspace\nexport GOPATH=$HOME/workspace\n\
+            export GOROOT=${USER_BIN_DIR}/go\nexport PATH=$PATH:$GOROOT/bin:$GOPATH/bin\n\
+            go version\n\necho \"### Build the builder image using pack\"\ncurl -sSL\
+            \ https://github.com/paketo-community/builder-ubi-base/tarball/main |\
+            \ tar -xz -C ${TEMP_DIR}\nmv ${TEMP_DIR}/paketo-community-builder-ubi-base-*\
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
-            \nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\npack\
-            \ builder create $(params.IMAGE) --config builder.toml -v\n\nset -x\n\
-            container=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
-            set +x\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh $SSH_ARGS\
-            \ \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\necho -n \"URL\
-            \ of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
-            \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
+            \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\" $build_arg\"\
+            )\ndone        \n\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
+            pack builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
+            \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
+            \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\"\
+            \ \"bash -s\" <scripts/script-build.sh\n\necho -n \"URL of the image build\
+            \ is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\necho -n\
+            \ \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
             \n"
           volumeMounts:

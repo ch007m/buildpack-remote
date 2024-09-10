@@ -240,7 +240,6 @@ spec:
             readOnly: true
           - mountPath: "/shared"
             name: "shared"
-            readOnly: true
         volumes:
         - name: "ssh"
           secret:

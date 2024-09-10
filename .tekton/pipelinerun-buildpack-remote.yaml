@@ -188,10 +188,12 @@ spec:
             $HOME/buildpack-repo\"\n\nPACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
             \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\
             mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
-            \   \n\n#echo \"### Podman status ###\"\n# podman version\n# echo \"##\
-            \ Status of the service ##\"\n# systemctl status podman.socket\n# systemctl\
-            \ --user start podman.socket\n#systemctl status podman.socket\n#ls -la\
-            \ $XDG_RUNTIME_DIR/podman\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
+            \   \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\
+            \ of the service ##\"\nsystemctl status podman.socket\nsystemctl --user\
+            \ start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
+            \necho \"Hack to be able to install builldah ...\"\nsudo podman run -v\
+            \ /etc:/hostetc ubi9 sed -s 's|usr/bin/podman|usr/bin/dnf /usr/bin/podman|g'\
+            \ (edited) \ndnf -y install buildah\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
             \ | tar -C ${TEMP_DIR} --no-same-owner -xzv pack\nmv ${TEMP_DIR}/pack\
             \ ${USER_BIN_DIR}\n\necho \"### Pack version ###\"\npack --version\npack\
             \ config experimental true   \n\necho \"### Go version ###\"\ncurl -sSL\
@@ -212,11 +214,11 @@ spec:
             buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\n#set +o verbose\n\
             \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\nrsync -ra scripts\
             \ \"$SSH_HOST:$BUILD_DIR\"\nrsync -ra \"$HOME/.docker/\" \"$SSH_HOST:$BUILD_DIR/.docker/\"\
-            \n\n#ssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\
-            ssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD podman run $PODMAN_PORT_FORWARD\
-            \ \\\n    -v \"$BUILD_DIR/scripts:/scripts:Z\" \\\n    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\"\
-            \ \\\n    --user=0 --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\n\
-            echo -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
+            \n\nssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\
+            #ssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD podman run $PODMAN_PORT_FORWARD\
+            \ \\\n#    -v \"$BUILD_DIR/scripts:/scripts:Z\" \\\n#    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\"\
+            \ \\\n#    --user=0 --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\
+            \necho -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
             \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
             \n"

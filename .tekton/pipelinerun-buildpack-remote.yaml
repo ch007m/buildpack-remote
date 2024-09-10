@@ -205,8 +205,8 @@ spec:
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
             \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\"$build_arg\"\
             )\ndone\n\necho \"Build arguments to be passed to the pack CLI\"\nfor\
-            \ arg in \"${BUILD_ARGS[@]}\"; do\n  echo \"arg: $arg\"\ndone\n\n#export\
-            \ DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n#set -o verbose\n\
+            \ arg in \"${BUILD_ARGS[@]}\"; do\n  echo \"arg: $arg\"\ndone\n\n#set\
+            \ -o verbose\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
             pack builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
             \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
             buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\n#set +o verbose\n\

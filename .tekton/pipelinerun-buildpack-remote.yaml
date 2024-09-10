@@ -242,6 +242,10 @@ spec:
           - mountPath: "/shared"
             name: "shared"
             readOnly: false
+          securityContext:
+            capabilities:
+              add:
+                - SETFCAP
         volumes:
         - name: "ssh"
           secret:

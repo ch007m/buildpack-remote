@@ -190,14 +190,14 @@ spec:
             mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
             \   \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\
             \ of the podman service ##\"\nsystemctl --user start podman.socket\nsystemctl\
-            \ status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\necho \"## Launch\
-            \ socat to expose the podman socket\"\nsocat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
+            \ status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\n#echo \"## Launch\
+            \ socat to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
             \ unix:/run/user/1000/podman/podman.sock &\n\necho \"IP address of the\
             \ host machine\"\nHOST_IP=$(hostname -I | awk '{print $1}')\necho \"Host\
-            \ IP: $HOST_IP\"\n\n#echo \"Hack to be able to install buildah ...\"\n\
-            #sudo podman run -v /etc:/hostetc ubi9 sed -s 's|usr/bin/podman|usr/bin/dnf\
-            \ /usr/bin/podman|g'\n#cat /etc/sudoers\n#sudo dnf -y install buildah\n\
-            \ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
+            \ IP: $HOST_IP\"\n\necho \"Hack to be able to install buildah ...\"\n\
+            sudo podman run -v /etc:/hostetc ubi9 sed -s 's|usr/bin/podman|usr/bin/dnf\
+            \ /usr/bin/podman|g'\nsudo podman run -v /etc:/hostetc ubi9 cat /etc/sudoers\n\
+            sudo dnf -y install buildah\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
             \ | tar -C ${TEMP_DIR} --no-same-owner -xzv pack\nmv ${TEMP_DIR}/pack\
             \ ${USER_BIN_DIR}\n\necho \"### Pack version ###\"\npack --version\npack\
             \ config experimental true   \n\necho \"### Go version ###\"\ncurl -sSL\
@@ -212,8 +212,8 @@ spec:
             \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\"$build_arg\"\
             )\ndone\n\necho \"Build arguments to be passed to the pack CLI\"\nfor\
             \ arg in \"${BUILD_ARGS[@]}\"; do\n  echo \"arg: $arg\"\ndone\n\n#set\
-            \ -o verbose\n#export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
-            export DOCKER_HOST=tcp://${HOST_IP}:2376\npack builder create $(params.IMAGE)\
+            \ -o verbose\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
+            #export DOCKER_HOST=tcp://${HOST_IP}:2376\npack builder create $(params.IMAGE)\
             \ --config builder.toml \"${BUILD_ARGS[@]}\"\n\ncontainer=$(buildah from\
             \ --pull-never $IMAGE)\nbuildah mount $container\nbuildah push \"$IMAGE\"\
             \ \"oci:konflux-final-image:$IMAGE\"\n#set +o verbose\n\nREMOTESSHEOF\n\

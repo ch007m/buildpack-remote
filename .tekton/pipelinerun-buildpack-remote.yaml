@@ -160,25 +160,18 @@ spec:
           name: "IMAGE_DIGEST"
         - description: "Digests of the base images used for build"
           name: "BASE_IMAGES_DIGESTS"
-        stepTemplate:
-          env:
-          - name: "BUILDER_IMAGE"
-            value: "$(params.BUILDER_IMAGE)"
-          - name: "PLATFORM"
-            value: "$(params.PLATFORM)"
-          - name: "IMAGE"
-            value: "$(params.output-image)"
-          - name: "PACK_CLI_VERSION"
-            value: "$(params.PACK_CLI_VERSION)"
+        stepTemplate: {}
         steps:
         - args:
           - "$(params.BUILD_ARGS)"
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
           script: "#!/usr/bin/env bash\n#set -o verbose\nset -eu\nset -o pipefail\n\
-            mkdir -p ~/.ssh\nif [ -e \"/ssh/error\" ]; then\n  #no server could be\
-            \ provisioned\n  cat /ssh/error\nexit 1\nelif [ -e \"/ssh/otp\" ]; then\n\
-            \  curl --cacert /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server)\
+            \n# Set the env vars here as stepTemplate don't work\nBUILDER_IMAGE=$(params.BUILDER_IMAGE)\n\
+            PLATFORM=$(params.PLATFORM)\nIMAGE=$(params.output-image)\nPACK_CLI_VERSION=$(params.PACK_CLI_VERSION)\n\
+            \nmkdir -p ~/.ssh\nif [ -e \"/ssh/error\" ]; then\n  #no server could\
+            \ be provisioned\n  cat /ssh/error\nexit 1\nelif [ -e \"/ssh/otp\" ];\
+            \ then\n  curl --cacert /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server)\
             \ >~/.ssh/id_rsa\n  echo \"\" >> ~/.ssh/id_rsa\nelse\n  cp /ssh/id_rsa\
             \ ~/.ssh\nfi\nchmod 0400 ~/.ssh/id_rsa\n\nexport SSH_HOST=$(cat /ssh/host)\n\
             export BUILD_DIR=$(cat /ssh/user-dir)\nexport SSH_ARGS=\"-o StrictHostKeyChecking=no\

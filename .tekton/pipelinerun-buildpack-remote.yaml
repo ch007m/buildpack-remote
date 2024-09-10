@@ -227,8 +227,7 @@ spec:
             name: "ssh"
             readOnly: true
         volumes:
-        - name: "ssh"
-          secret:
+        - secret:
             secretName: "multi-platform-ssh-$(context.taskRun.name)"
       workspaces:
       - name: "source"
@@ -367,7 +366,7 @@ spec:
           value: "task"
         resolver: "bundles"
   timeouts:
-    pipeline: "300000000000ns"
+    pipeline: "900000000000ns"
   workspaces:
   - name: "workspace"
     volumeClaimTemplate:

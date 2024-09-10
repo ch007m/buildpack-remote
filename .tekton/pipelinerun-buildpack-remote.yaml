@@ -189,7 +189,7 @@ spec:
             \ /shared/ \"$SSH_HOST:$BUILD_DIR/volumes/shared/\"\nrsync -ra \"/tekton/results/\"\
             \ \"$SSH_HOST:$BUILD_DIR/results/\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
             #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
-            $HOME/buildpack-repo\"\n\n#PACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
+            $HOME/buildpack-repo\"\n\nprintenv\n\n#PACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
             \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\
             mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
             \   \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\

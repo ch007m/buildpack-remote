@@ -215,13 +215,14 @@ spec:
             \ | tar -xz -C ${TEMP_DIR}\nmv ${TEMP_DIR}/paketo-community-builder-ubi-base-*\
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
             \nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\npack\
-            \ builder create $(params.IMAGE) --config builder.toml -v\n\ncontainer=$(buildah\
-            \ from --pull-never $IMAGE)\nbuildah mount $container\n\nREMOTESSHEOF\n\
-            chmod +x scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\"\
-            \ <scripts/script-build.sh\n\necho -n \"URL of the image build is : quarkus-hello:1.0\"\
-            \ | tee \"$(results.IMAGE_URL.path)\"\necho -n \"sha256ddddddddddddddddddddd\"\
-            \ | tee \"$(results.IMAGE_DIGEST.path)\"\necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\"\
-            \ | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\n"
+            \ builder create $(params.IMAGE) --config builder.toml -v\n\nset -x\n\
+            container=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
+            set +x\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh $SSH_ARGS\
+            \ \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\necho -n \"URL\
+            \ of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
+            \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
+            \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
+            \n"
           volumeMounts:
           - mountPath: "/ssh"
             name: "ssh"

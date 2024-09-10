@@ -192,8 +192,8 @@ spec:
             \ of the service ##\"\nsystemctl status podman.socket\nsystemctl --user\
             \ start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
             \necho \"Hack to be able to install builldah ...\"\nsudo podman run -v\
-            \ /etc:/hostetc ubi9 sed -s 's|usr/bin/podman|usr/bin/dnf /usr/bin/podman|g'\
-            \ (edited) \ndnf -y install buildah\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
+            \ /etc:/hostetc ubi9 sed -s 's|usr/bin/podman|usr/bin/dnf /usr/bin/podman|g'\n\
+            dnf -y install buildah\n\ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\
             \ | tar -C ${TEMP_DIR} --no-same-owner -xzv pack\nmv ${TEMP_DIR}/pack\
             \ ${USER_BIN_DIR}\n\necho \"### Pack version ###\"\npack --version\npack\
             \ config experimental true   \n\necho \"### Go version ###\"\ncurl -sSL\

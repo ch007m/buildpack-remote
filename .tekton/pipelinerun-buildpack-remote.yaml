@@ -211,9 +211,10 @@ spec:
             \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
             buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\n#set +o verbose\n\
             \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\nrsync -ra scripts\
-            \ \"$SSH_HOST:$BUILD_DIR\"\n\n#ssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\"\
-            \ <scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD\
-            \ podman run $PODMAN_PORT_FORWARD \\\n    -v \"$BUILD_DIR/scripts:/scripts:Z\"\
+            \ \"$SSH_HOST:$BUILD_DIR\"\nrsync -ra \"$HOME/.docker/\" \"$SSH_HOST:$BUILD_DIR/.docker/\"\
+            \n\n#ssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\
+            ssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD podman run $PODMAN_PORT_FORWARD\
+            \ \\\n    -v \"$BUILD_DIR/scripts:/scripts:Z\" \\\n    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\"\
             \ \\\n    --user=0 --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\n\
             echo -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
             \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\

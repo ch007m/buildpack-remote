@@ -222,9 +222,14 @@ spec:
                 #!/bin/sh
                 # podman pull quay.io/centos-bootc/centos-bootc:stream9
                 
-                echo "### Versions ###"
+                echo "### Podman version ###"
                 podman version
+                
+                echo "### Podman version ###"
                 go env
+                
+                echo "### Podman version ###"
+                sudo yum install git
                 git version
                 
                 REMOTESSHEOF

@@ -164,7 +164,7 @@ spec:
           name: "BASE_IMAGES_DIGESTS"
         steps:
         - args:
-          - "$(params.BUILD_ARGS[*])"
+          - "$(params.BUILD_ARGS)"
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
           script: "#!/usr/bin/env bash\n# set -o verbose\nset -eu\nset -o pipefail\n\
@@ -197,12 +197,14 @@ spec:
             \ https://github.com/paketo-community/builder-ubi-base/tarball/main |\
             \ tar -xz -C ${TEMP_DIR}\nmv ${TEMP_DIR}/paketo-community-builder-ubi-base-*\
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
-            \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\" $build_arg\"\
-            )\ndone        \n\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
-            set -o verbose\npack builder create $(params.IMAGE) --config builder.toml\
-            \ \"${BUILD_ARGS[@]}\"\n\ncontainer=$(buildah from --pull-never $IMAGE)\n\
-            buildah mount $container\nset +o verbose\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\
-            ssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\necho\
+            \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\"$build_arg\"\
+            )\ndone\n\necho \"Build arguments to be passed to the pack CLI\"\nfor\
+            \ arg in \"$BUILD_ARGS[@]\"; do\n  echo \"arg: $arg\"\ndone\n\nexport\
+            \ DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\nset -o verbose\n\
+            pack builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
+            \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
+            set +o verbose\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh\
+            \ $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\necho\
             \ -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
             \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\

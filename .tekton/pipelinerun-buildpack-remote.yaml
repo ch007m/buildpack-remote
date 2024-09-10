@@ -199,14 +199,15 @@ spec:
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
             \nBUILD_ARGS=()\nfor build_arg in \"$@\"; do\n  BUILD_ARGS+=(\"$build_arg\"\
             )\ndone\n\necho \"Build arguments to be passed to the pack CLI\"\nfor\
-            \ arg in \"$BUILD_ARGS[@]\"; do\n  echo \"arg: $arg\"\ndone\n\nexport\
+            \ arg in \"${BUILD_ARGS[@]}\"; do\n  echo \"arg: $arg\"\ndone\n\nexport\
             \ DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\nset -o verbose\n\
             pack builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
             \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
-            set +o verbose\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh\
-            \ $SSH_ARGS \"$SSH_HOST\" \"bash -s\" <scripts/script-build.sh\n\necho\
-            \ -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
-            \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
+            buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\nset +o verbose\n\
+            \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\"\
+            \ \"bash -s\" <scripts/script-build.sh\n\necho -n \"URL of the image build\
+            \ is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\necho -n\
+            \ \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
             \n"
           volumeMounts:

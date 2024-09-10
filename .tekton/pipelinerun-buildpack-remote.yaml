@@ -187,10 +187,11 @@ spec:
             export GO_VERSION=$(params.GO_VERSION)\n\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"\
             $HOME/bin\"\nBUILDPACK_PROJECTS=\"$HOME/buildpack-repo\"\n\nprintenv\n\
             \nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\nmkdir -p ${BUILDPACK_PROJECTS}\n\
-            \nexport PATH=$PATH:${USER_BIN_DIR}     \n\necho \"### Podman status ###\"\
-            \npodman version\necho \"## Status of the podman service ##\"\nsystemctl\
-            \ --user start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
-            \n#echo \"## Launch socat to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
+            mkdir -p /shared\n\nexport PATH=$PATH:${USER_BIN_DIR}     \n\necho \"\
+            ### Podman status ###\"\npodman version\necho \"## Status of the podman\
+            \ service ##\"\nsystemctl --user start podman.socket\nsystemctl status\
+            \ podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\n#echo \"## Launch socat\
+            \ to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
             \ unix:/run/user/1000/podman/podman.sock &\n\n#echo \"IP address of the\
             \ host machine\"\n#HOST_IP=$(hostname -I | awk '{print $1}')\n#echo \"\
             Host IP: $HOST_IP\"\n\n# echo \"Hack to be able to install buildah ...\"\

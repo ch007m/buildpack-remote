@@ -13,7 +13,7 @@ metadata:
     pipelines.appstudio.openshift.io/type: "build"
     pipelines.openshift.io/strategy: "remote-build"
     appstudio.openshift.io/component: "buildpack-remote"
-    pipelines.openshift.io/used-by: "build-cloud-1"
+    pipelines.openshift.io/used-by: "build-cloud"
     pipelines.openshift.io/runtime: "java"
   name: "buildpack-remote"
   namespace: "cmoullia-tenant"
@@ -35,6 +35,8 @@ spec:
     value: ""
   - name: "PLATFORM"
     value: "linux-mlarge/amd64"
+  - name: "output-image"
+    value: "quay.io/redhat-user-workloads/cmoullia-tenant/konflux-demo/buildpack-remote:{{revision}}"
   - name: "source-dir"
     value: "source"
   - name: "imageUrl"
@@ -164,6 +166,8 @@ spec:
         value: ""
       - name: "SOURCE_SUBPATH"
         value: "."
+      - name: "IMAGE"
+        value: "$(params.output-image)"
       - name: "PLATFORM"
         value: "$(params.PLATFORM)"
       runAfter:
@@ -212,8 +216,9 @@ spec:
             echo \"### Build the builder image using pack\"\ncurl -sSL https://github.com/paketo-community/builder-ubi-base/tarball/main\
             \ | tar -xz -C ${TEMP_DIR}\nmv ${TEMP_DIR}/paketo-community-builder-ubi-base-*\
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
-            ls\n\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
-            pack builder create builder --config builder.toml -vv\n\nREMOTESSHEOF\n\
+            \nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\npack\
+            \ builder create $(params.IMAGE) --config builder.toml -v\n\ncontainer=$(buildah\
+            \ from --pull-never $IMAGE)\nbuildah mount $container\n\nREMOTESSHEOF\n\
             chmod +x scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\"\
             \ <scripts/script-build.sh\n\necho -n \"URL of the image build is : quarkus-hello:1.0\"\
             \ | tee \"$(results.IMAGE_URL.path)\"\necho -n \"sha256ddddddddddddddddddddd\"\

@@ -13,7 +13,7 @@ metadata:
     pipelines.appstudio.openshift.io/type: "build"
     pipelines.openshift.io/strategy: "remote-build"
     appstudio.openshift.io/component: "buildpack-remote"
-    pipelines.openshift.io/used-by: "build-cloud-1"
+    pipelines.openshift.io/used-by: "build-cloud"
     pipelines.openshift.io/runtime: "java"
   name: "buildpack-remote"
   namespace: "cmoullia-tenant"
@@ -181,10 +181,10 @@ spec:
             ssh $SSH_ARGS \"$SSH_HOST\" mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\"\
             \ \"$BUILD_DIR/volumes\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
             #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
-            $HOME/buildpack-repo\"\n\nPACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
-            \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\
-            mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
-            \   \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\
+            $HOME/buildpack-repo\"\nBUILDER_IMAGE=$(params.BUILDER_IMAGE)\"\n\nPACK_CLI_VERSION=\"\
+            $(params.PACK_CLI_VERSION)\"\nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\n\
+            mkdir -p ${USER_BIN_DIR}\nmkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}\
+            \     \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\
             \ of the service ##\"\nsystemctl status podman.socket\nsystemctl --user\
             \ start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
             \ncurl -sSL \"https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz\"\

@@ -220,18 +220,33 @@ spec:
                 
                 cat >scripts/script-build.sh <<'REMOTESSHEOF'
                 #!/bin/sh
-                # podman pull quay.io/centos-bootc/centos-bootc:stream9
+                TEMP_DIR="$HOME/tmp"
+                USER_BIN_DIR="$HOME/bin"
+                
+                PACK_CLI_VERSION="v0.35.1"
+                
+                mkdir -p ${TEMP_DIR}
+                mkdir -p ${USER_BIN_DIR}
+                
+                export PATH=$PATH:${USER_BIN_DIR}
+                
+                curl -sSL "https://github.com/buildpacks/pack/releases/download/${PACK_CLI_VERSION}/pack-${PACK_CLI_VERSION}-linux.tgz" | tar -C ${TEMP_DIR} --no-same-owner -xzv pack
+                mv ${TEMP_DIR}/pack ${USER_BIN_DIR}
+                
+                echo "### Pack version ###"
+                pack --version
+                pack config experimental true        
                 
                 echo "### Podman version ###"
                 podman version
                 
-                echo "### Podman version ###"
-                go env
+                echo "### Go version ###"
+                go env => NOT INSTALLED
                 
-                echo "### Podman version ###"
-                # sudo yum install git => Not supported
-                yum install git
-                git version
+                # echo "### Git version ###"
+                # sudo yum install git => NOT ALLOWED
+                # yum install git => This command has to be run with superuser privileges 
+                # git version
                 
                 REMOTESSHEOF
                 chmod +x scripts/script-build.sh

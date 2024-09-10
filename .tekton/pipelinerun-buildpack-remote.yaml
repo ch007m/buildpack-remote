@@ -167,28 +167,28 @@ spec:
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
           script: "#!/usr/bin/env bash\n#set -o verbose\nset -eu\nset -o pipefail\n\
-            \n# Set the env vars here as stepTemplate don't work\nBUILDER_IMAGE=$(params.BUILDER_IMAGE)\n\
-            PLATFORM=$(params.PLATFORM)\nIMAGE=$(params.output-image)\nPACK_CLI_VERSION=$(params.PACK_CLI_VERSION)\n\
-            \nmkdir -p ~/.ssh\nif [ -e \"/ssh/error\" ]; then\n  #no server could\
-            \ be provisioned\n  cat /ssh/error\nexit 1\nelif [ -e \"/ssh/otp\" ];\
-            \ then\n  curl --cacert /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server)\
-            \ >~/.ssh/id_rsa\n  echo \"\" >> ~/.ssh/id_rsa\nelse\n  cp /ssh/id_rsa\
-            \ ~/.ssh\nfi\nchmod 0400 ~/.ssh/id_rsa\n\nexport SSH_HOST=$(cat /ssh/host)\n\
-            export BUILD_DIR=$(cat /ssh/user-dir)\nexport SSH_ARGS=\"-o StrictHostKeyChecking=no\
-            \ -o ServerAliveInterval=60 -o ServerAliveCountMax=10\"\nmkdir -p scripts\n\
-            \nPORT_FORWARD=\"\"\nPODMAN_PORT_FORWARD=\"\"\n\necho \"$BUILD_DIR\"\n\
-            ssh $SSH_ARGS \"$SSH_HOST\" mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\"\
-            \ \"$BUILD_DIR/volumes\"\n\necho \"rsync shared folders ...\"\nrsync -ra\
-            \ /shared/ \"$SSH_HOST:$BUILD_DIR/volumes/shared/\"\nrsync -ra \"/tekton/results/\"\
-            \ \"$SSH_HOST:$BUILD_DIR/results/\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
-            #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
-            $HOME/buildpack-repo\"\n\nprintenv\n\n#PACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
-            \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\
-            mkdir -p ${BUILDPACK_PROJECTS}\n\nexport PATH=$PATH:${USER_BIN_DIR}  \
-            \   \n\necho \"### Podman status ###\"\npodman version\necho \"## Status\
-            \ of the podman service ##\"\nsystemctl --user start podman.socket\nsystemctl\
-            \ status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\n#echo \"## Launch\
-            \ socat to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
+            \n# Set the env vars here as stepTemplate don't work\nexport BUILDER_IMAGE=$(params.BUILDER_IMAGE)\n\
+            export PLATFORM=$(params.PLATFORM)\nexport IMAGE=$(params.output-image)\n\
+            export PACK_CLI_VERSION=$(params.PACK_CLI_VERSION)\n\nmkdir -p ~/.ssh\n\
+            if [ -e \"/ssh/error\" ]; then\n  #no server could be provisioned\n  cat\
+            \ /ssh/error\nexit 1\nelif [ -e \"/ssh/otp\" ]; then\n  curl --cacert\
+            \ /ssh/otp-ca -XPOST -d @/ssh/otp $(cat /ssh/otp-server) >~/.ssh/id_rsa\n\
+            \  echo \"\" >> ~/.ssh/id_rsa\nelse\n  cp /ssh/id_rsa ~/.ssh\nfi\nchmod\
+            \ 0400 ~/.ssh/id_rsa\n\nexport SSH_HOST=$(cat /ssh/host)\nexport BUILD_DIR=$(cat\
+            \ /ssh/user-dir)\nexport SSH_ARGS=\"-o StrictHostKeyChecking=no -o ServerAliveInterval=60\
+            \ -o ServerAliveCountMax=10\"\nmkdir -p scripts\n\nPORT_FORWARD=\"\"\n\
+            PODMAN_PORT_FORWARD=\"\"\n\necho \"$BUILD_DIR\"\nssh $SSH_ARGS \"$SSH_HOST\"\
+            \ mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\" \"$BUILD_DIR/volumes\"\
+            \n\necho \"rsync shared folders ...\"\nrsync -ra /shared/ \"$SSH_HOST:$BUILD_DIR/volumes/shared/\"\
+            \nrsync -ra \"/tekton/results/\" \"$SSH_HOST:$BUILD_DIR/results/\"\n\n\
+            cat >scripts/script-build.sh <<'REMOTESSHEOF'\n#!/bin/sh\nTEMP_DIR=\"\
+            $HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"$HOME/buildpack-repo\"\
+            \n\nprintenv\n\n#PACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\nGO_VERSION=\"\
+            1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\nmkdir -p ${BUILDPACK_PROJECTS}\n\
+            \nexport PATH=$PATH:${USER_BIN_DIR}     \n\necho \"### Podman status ###\"\
+            \npodman version\necho \"## Status of the podman service ##\"\nsystemctl\
+            \ --user start podman.socket\nsystemctl status podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\
+            \n#echo \"## Launch socat to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
             \ unix:/run/user/1000/podman/podman.sock &\n\n#echo \"IP address of the\
             \ host machine\"\n#HOST_IP=$(hostname -I | awk '{print $1}')\n#echo \"\
             Host IP: $HOST_IP\"\n\n# echo \"Hack to be able to install buildah ...\"\

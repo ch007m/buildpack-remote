@@ -229,7 +229,8 @@ spec:
                 go env
                 
                 echo "### Podman version ###"
-                sudo yum install git
+                # sudo yum install git => Not supported
+                yum install git
                 git version
                 
                 REMOTESSHEOF

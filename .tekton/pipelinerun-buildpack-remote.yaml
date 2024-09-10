@@ -31,8 +31,6 @@ spec:
     value: "false"
   - name: "prefetch-input"
     value: ""
-  - name: "PLATFORM"
-    value: "linux-mlarge/amd64"
   - name: "output-image"
     value: "quay.io/redhat-user-workloads/cmoullia-tenant/konflux-demo/buildpack-remote:{{revision}}"
   pipelineSpec:
@@ -146,7 +144,7 @@ spec:
       - name: "IMAGE"
         value: "$(params.output-image)"
       - name: "PLATFORM"
-        value: "$(params.PLATFORM)"
+        value: "linux-mlarge/amd64"
       - name: "BUILDER_IMAGE"
         value: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
       - name: "PACK_CLI_VERSION"
@@ -164,6 +162,12 @@ spec:
           name: "IMAGE_DIGEST"
         - description: "Digests of the base images used for build"
           name: "BASE_IMAGES_DIGESTS"
+        stepTemplate:
+          env:
+          - name: "BUILDER_IMAGE"
+            value: "$(params.BUILDER_IMAGE)"
+          - name: "PLATFORM"
+            value: "$(params.PLATFORM)"
         steps:
         - args:
           - "$(params.BUILD_ARGS)"
@@ -179,8 +183,7 @@ spec:
             \ -o ServerAliveInterval=60 -o ServerAliveCountMax=10\"\nmkdir -p scripts\n\
             \nPORT_FORWARD=\"\"\nPODMAN_PORT_FORWARD=\"\"\n\necho \"$BUILD_DIR\"\n\
             ssh $SSH_ARGS \"$SSH_HOST\" mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\"\
-            \ \"$BUILD_DIR/volumes\"\n\necho \"Set env variables\"\nBUILDER_IMAGE=\"\
-            $(params.BUILDER_IMAGE)\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
+            \ \"$BUILD_DIR/volumes\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
             #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
             $HOME/buildpack-repo\"\n\nPACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
             \nGO_VERSION=\"1.23.0\"\n\nmkdir -p ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\n\

@@ -244,7 +244,7 @@ spec:
                 podman version
                 
                 echo "### Go version ###"
-                curl -sSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -C ${TEMP_DIR} -xzv go
+                curl -sSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -C ${TEMP_DIR} -xz go
                 mkdir -p ${USER_BIN_DIR}/go
                 mv ${TEMP_DIR}/go ${USER_BIN_DIR}
                 chmod +x ${USER_BIN_DIR}/go
@@ -260,9 +260,9 @@ spec:
                 # yum install git => This command has to be run with superuser privileges 
                 # git version
                 
-                echo "Build the builder image using pack"
-                curl -sSL https://github.com/paketo-community/builder-ubi-base/tarball/main | tar -C ${TEMP_DIR} -xzv builder-ubi-base
-                mv ${TEMP_DIR}/builder-ubi-base ${BUILDPACK_PROJECTS}/builder-ubi-base
+                echo "### Build the builder image using pack"
+                curl -sSL https://github.com/paketo-community/builder-ubi-base/tarball/main | tar -xz -C ${TEMP_DIR}
+                mv ${TEMP_DIR}/paketo-community-builder-ubi-base-* ${BUILDPACK_PROJECTS}/builder-ubi-base
                 cd ${BUILDPACK_PROJECTS}/builder-ubi-base
                 ls
   

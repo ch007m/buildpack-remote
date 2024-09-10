@@ -222,12 +222,14 @@ spec:
                 #!/bin/sh
                 TEMP_DIR="$HOME/tmp"
                 USER_BIN_DIR="$HOME/bin"
+                BUILDPACK_PROJECTS="$HOME/buildpack-repo"
                 
                 PACK_CLI_VERSION="v0.35.1"
                 GO_VERSION="1.23.0"
                 
                 mkdir -p ${TEMP_DIR}
                 mkdir -p ${USER_BIN_DIR}
+                mkdir -p ${BUILDPACK_PROJECTS}
                 
                 export PATH=$PATH:${USER_BIN_DIR}
                 
@@ -257,6 +259,15 @@ spec:
                 # sudo yum install git => NOT ALLOWED
                 # yum install git => This command has to be run with superuser privileges 
                 # git version
+                
+                echo "Build the builder image using pack"
+                curl -sSL https://github.com/paketo-community/builder-ubi-base/tarball/main | tar -C ${TEMP_DIR} -xzv builder-ubi-base
+                mv ${TEMP_DIR}/builder-ubi-base ${BUILDPACK_PROJECTS}/builder-ubi-base
+                cd ${BUILDPACK_PROJECTS}/builder-ubi-base
+                ls
+  
+                export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
+                pack builder create builder --config builder.toml
                 
                 REMOTESSHEOF
                 chmod +x scripts/script-build.sh

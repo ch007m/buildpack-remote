@@ -214,7 +214,7 @@ spec:
             \ verbose\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
             # export DOCKER_HOST=tcp://${HOST_IP}:2376\npack builder create ${IMAGE}\
             \ --config builder.toml \"${BUILD_ARGS[@]}\"\n\ncontainer=$(podman create\
-            \ ${IMAGE})\necho \"Container: $container\"\n\ntouch /shared/container_path\n\
+            \ ${IMAGE})\necho \"Container: $container\"\n\nls -la /shared\ntouch /shared/container_path\n\
             podman unshare\npodman mount $container | tee /shared/container_path\n\
             # delete symlinks - they may point outside the container rootfs, messing\
             \ with SBOM scanners\nfind $(cat /shared/container_path) -xtype l -delete\n\

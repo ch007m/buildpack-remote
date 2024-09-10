@@ -33,6 +33,8 @@ spec:
     value: ""
   - name: "PLATFORM"
     value: "linux-mlarge/amd64"
+  - name: "BUILDER_IMAGE"
+    value: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
   - name: "output-image"
     value: "quay.io/redhat-user-workloads/cmoullia-tenant/konflux-demo/buildpack-remote:{{revision}}"
   pipelineSpec:
@@ -167,10 +169,6 @@ spec:
           - "$(params.BUILD_ARGS)"
           image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
-          securityContext:
-            capabilities:
-              add:
-                - SETFCAP
           script: "#!/usr/bin/env bash\n# set -o verbose\nset -eu\nset -o pipefail\n\
             mkdir -p ~/.ssh\nif [ -e \"/ssh/error\" ]; then\n  #no server could be\
             \ provisioned\n  cat /ssh/error\nexit 1\nelif [ -e \"/ssh/otp\" ]; then\n\
@@ -179,8 +177,8 @@ spec:
             \ ~/.ssh\nfi\nchmod 0400 ~/.ssh/id_rsa\n\nexport SSH_HOST=$(cat /ssh/host)\n\
             export BUILD_DIR=$(cat /ssh/user-dir)\nexport SSH_ARGS=\"-o StrictHostKeyChecking=no\
             \ -o ServerAliveInterval=60 -o ServerAliveCountMax=10\"\nmkdir -p scripts\n\
-            \necho \"### List files under /ssh\"\nls -la /ssh\n\necho \"$BUILD_DIR\"\
-            \nssh $SSH_ARGS \"$SSH_HOST\"  mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\"\
+            \nPORT_FORWARD=\"\"\nPODMAN_PORT_FORWARD=\"\"\n\necho \"$BUILD_DIR\"\n\
+            ssh $SSH_ARGS \"$SSH_HOST\" mkdir -p \"$BUILD_DIR/workspaces\" \"$BUILD_DIR/scripts\"\
             \ \"$BUILD_DIR/volumes\"\n\ncat >scripts/script-build.sh <<'REMOTESSHEOF'\n\
             #!/bin/sh\nTEMP_DIR=\"$HOME/tmp\"\nUSER_BIN_DIR=\"$HOME/bin\"\nBUILDPACK_PROJECTS=\"\
             $HOME/buildpack-repo\"\n\nPACK_CLI_VERSION=\"$(params.PACK_CLI_VERSION)\"\
@@ -208,10 +206,13 @@ spec:
             pack builder create $(params.IMAGE) --config builder.toml \"${BUILD_ARGS[@]}\"\
             \n\ncontainer=$(buildah from --pull-never $IMAGE)\nbuildah mount $container\n\
             buildah push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\nset +o verbose\n\
-            \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\"\
-            \ \"bash -s\" <scripts/script-build.sh\n\necho -n \"URL of the image build\
-            \ is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\necho -n\
-            \ \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
+            \nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\nrsync -ra scripts\
+            \ \"$SSH_HOST:$BUILD_DIR\"\n\n#ssh $SSH_ARGS \"$SSH_HOST\" \"bash -s\"\
+            \ <scripts/script-build.sh\nssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD\
+            \ podman run $PODMAN_PORT_FORWARD \\\n    -v \"$BUILD_DIR/scripts:/scripts:Z\"\
+            \ \\\n    --user=0 --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\n\
+            echo -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
+            \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
             \n"
           volumeMounts:

@@ -242,6 +242,13 @@ spec:
                 
                 echo "### Podman version ###"
                 podman version
+                podman info
+                
+                echo "## Status of the service ##"
+                systemctl status podman.socket
+                systemctl --user start podman.socket
+                systemctl status podman.socket
+                ls -la $XDG_RUNTIME_DIR/podman
                 
                 echo "### Go version ###"
                 curl -sSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -C ${TEMP_DIR} -xz go

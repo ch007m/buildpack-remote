@@ -178,6 +178,8 @@ spec:
             value: "$(params.PACK_CLI_VERSION)"
           - name: "GO_VERSION"
             value: "$(params.GO_VERSION)"
+          - name: "BUILD_ARGS"
+            value: "$(params.BUILD_ARGS)"
         steps:
         - image: "quay.io/konflux-ci/buildah-task:latest@sha256:860a239c5f25376a435a514ae6d53a5c75b1fa492461d17774e9b7cb32d1e275"
           name: "run-script"
@@ -203,10 +205,10 @@ spec:
             echo $FOO, $BAR\necho \"## End :: Echo foo, bar env var\"\n\nmkdir -p\
             \ ${TEMP_DIR}\nmkdir -p ${USER_BIN_DIR}\nmkdir -p ${BUILDPACK_PROJECTS}\n\
             mkdir -p ${HOME}/shared\n\nexport PATH=$PATH:${USER_BIN_DIR}\n\necho \"\
-            ### Podman status ###\"\npodman version\necho \"## Status of the podman\
+            ### Podman status ###\"\npodman version\n\necho \"## Status of the podman\
             \ service ##\"\nsystemctl --user start podman.socket\nsystemctl status\
-            \ podman.socket\nls -la $XDG_RUNTIME_DIR/podman\n\n#echo \"## Launch socat\
-            \ to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
+            \ podman.socket\n# ls -la $XDG_RUNTIME_DIR/podman\n\n#echo \"## Launch\
+            \ socat to expose the podman socket\"\n#socat TCP-LISTEN:2376,reuseaddr,fork,bind=0.0.0.0\
             \ unix:/run/user/1000/podman/podman.sock &\n\n#echo \"IP address of the\
             \ host machine\"\n#HOST_IP=$(hostname -I | awk '{print $1}')\n#echo \"\
             Host IP: $HOST_IP\"\n\n# echo \"Hack to be able to install buildah ...\"\
@@ -224,33 +226,32 @@ spec:
             \ https://github.com/paketo-community/builder-ubi-base/tarball/main |\
             \ tar -xz -C ${TEMP_DIR}\nmv ${TEMP_DIR}/paketo-community-builder-ubi-base-*\
             \ ${BUILDPACK_PROJECTS}/builder-ubi-base\ncd ${BUILDPACK_PROJECTS}/builder-ubi-base\n\
-            \n# NOt needed as we pass the BUIDL_ARGS using Tekton's env var\n# BUILD_ARGS=()\n\
+            \n# Not needed as we pass the BUIDL_ARGS using Tekton's env var\n# BUILD_ARGS=()\n\
             #for build_arg in \"$@\"; do\n#  BUILD_ARGS+=(\"$build_arg\")\n#done\n\
             \n#echo \"Build arguments to be passed to the pack CLI\"\n#for arg in\
             \ \"${BUILD_ARGS[@]}\"; do\n#  echo \"arg: $arg\"\n#done\n\nset -o verbose\n\
-            export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n# export\
-            \ DOCKER_HOST=tcp://${HOST_IP}:2376\npack builder create ${IMAGE} --config\
-            \ builder.toml \"${BUILD_ARGS[@]}\"\n\ncontainer=$(podman create ${IMAGE})\n\
-            echo \"Container: $container\"\n\ntouch ${HOME}/shared/container_path\n\
-            podman unshare\npodman mount $container | tee ${HOME}/shared/container_path\n\
-            # delete symlinks - they may point outside the container rootfs, messing\
-            \ with SBOM scanners\nfind $(cat ${HOME}/shared/container_path) -xtype\
-            \ l -delete\necho $container > ${HOME}/shared/container_name\n\npodman\
-            \ push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\necho \"## List konflux-final-image\"\
-            \nls -la konflux-final-image\n\necho \"## List ${HOME}/shared/container_path\"\
-            \nls -la ${HOME}/shared/container_path\n\necho \"## Show ${HOME}/shared/container_name\"\
-            \ncat ${HOME}/shared/container_name\nset +o verbose\n\nREMOTESSHEOF\n\
-            chmod +x scripts/script-build.sh\n\nrsync -ra scripts \"$SSH_HOST:$BUILD_DIR\"\
-            \nrsync -ra \"$HOME/.docker/\" \"$SSH_HOST:$BUILD_DIR/.docker/\"\n\nssh\
-            \ $SSH_ARGS \"$SSH_HOST\" \\\n  \"FOO=${FOO} \n   BAR=${BAR}\n   BUILDER_IMAGE=$BUILDER_IMAGE\n\
-            \   PLATFORM=$PLATFORM\n   IMAGE=$IMAGE\n   PACK_CLI_VERSION=$PACK_CLI_VERSION\n\
-            \   GO_VERSION=$GO_VERSION\n   BUILD_ARGS=$BUILD_ARGS\n   scripts/script-build.sh\"\
-            \n\n# DON'T WORK AS PACK CANNOT ACCESS DOCKER HOST\n# ssh $SSH_ARGS \"\
-            $SSH_HOST\" $PORT_FORWARD podman run $PODMAN_PORT_FORWARD \\\n#    -v\
-            \ \"$BUILD_DIR/scripts:/scripts:Z\" \\\n#    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\"\
-            \ \\\n#    -v \"$BUILD_DIR/volumes/shared:/shared:Z\" \\\n#    --user=0\
-            \ --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\necho -n \"URL of\
-            \ the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
+            # export DOCKER_HOST=tcp://${HOST_IP}:2376\n\nexport DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock\n\
+            pack builder create ${IMAGE} --config builder.toml \"${BUILD_ARGS[@]}\"\
+            \n\ncontainer=$(podman create ${IMAGE})\necho \"Container: $container\"\
+            \n\ntouch ${HOME}/shared/container_path\npodman unshare\npodman mount\
+            \ $container | tee ${HOME}/shared/container_path\n# delete symlinks -\
+            \ they may point outside the container rootfs, messing with SBOM scanners\n\
+            find $(cat ${HOME}/shared/container_path) -xtype l -delete\necho $container\
+            \ > ${HOME}/shared/container_name\n\npodman push \"$IMAGE\" \"oci:konflux-final-image:$IMAGE\"\
+            \necho \"## List konflux-final-image\"\nls -la konflux-final-image\n\n\
+            echo \"## List ${HOME}/shared/container_path\"\nls -la ${HOME}/shared/container_path\n\
+            \necho \"## Show ${HOME}/shared/container_name\"\ncat ${HOME}/shared/container_name\n\
+            set +o verbose\n\nREMOTESSHEOF\nchmod +x scripts/script-build.sh\n\nrsync\
+            \ -ra scripts \"$SSH_HOST:$BUILD_DIR\"\nrsync -ra \"$HOME/.docker/\" \"\
+            $SSH_HOST:$BUILD_DIR/.docker/\"\n\nssh $SSH_ARGS \"$SSH_HOST\" \\\n  \"\
+            FOO=${FOO} \n   BAR=${BAR}\n   BUILDER_IMAGE=$BUILDER_IMAGE\n   PLATFORM=$PLATFORM\n\
+            \   IMAGE=$IMAGE\n   PACK_CLI_VERSION=$PACK_CLI_VERSION\n   GO_VERSION=$GO_VERSION\n\
+            \   BUILD_ARGS=$BUILD_ARGS\n   scripts/script-build.sh\"\n\n# DON'T WORK\
+            \ AS PACK CANNOT ACCESS DOCKER HOST\n# ssh $SSH_ARGS \"$SSH_HOST\" $PORT_FORWARD\
+            \ podman run $PODMAN_PORT_FORWARD \\\n#    -v \"$BUILD_DIR/scripts:/scripts:Z\"\
+            \ \\\n#    -v \"$BUILD_DIR/.docker/:/root/.docker:Z\" \\\n#    -v \"$BUILD_DIR/volumes/shared:/shared:Z\"\
+            \ \\\n#    --user=0 --rm \"$BUILDER_IMAGE\" /scripts/script-build.sh\n\
+            \necho -n \"URL of the image build is : quarkus-hello:1.0\" | tee \"$(results.IMAGE_URL.path)\"\
             \necho -n \"sha256ddddddddddddddddddddd\" | tee \"$(results.IMAGE_DIGEST.path)\"\
             \necho -n \"sha256eeeeeeeeeeeeeeeeeeeeee\" | tee \"$(results.BASE_IMAGES_DIGESTS.path)\"\
             \n\nrsync -ra \"$SSH_HOST:$BUILD_DIR/shared/\" /shared/\nrsync -ra \"\

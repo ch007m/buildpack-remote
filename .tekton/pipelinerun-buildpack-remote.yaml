@@ -306,9 +306,14 @@ spec:
 
             set -o verbose
             # export DOCKER_HOST=tcp://${HOST_IP}:2376
+            PACK_ARGS=()
+
+            for build_arg in "${BUILD_ARGS[@]}"; do
+              PACK_ARGS+=(" $build_arg")
+            done
 
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-            pack builder create ${IMAGE} --config builder.toml "${BUILD_ARGS[@]}"
+            pack builder create ${IMAGE} --config builder.toml "${PACK_ARGS[@]}"
 
             container=$(podman create ${IMAGE})
             echo "Container: $container"

@@ -164,10 +164,6 @@ spec:
           name: "BASE_IMAGES_DIGESTS"
         stepTemplate:
           env:
-          - name: "FOO"
-            value: "bar"
-          - name: "BAR"
-            value: "foo"
           - name: "BUILDER_IMAGE"
             value: "$(params.BUILDER_IMAGE)"
           - name: "PLATFORM"
@@ -238,10 +234,6 @@ spec:
             USER_BIN_DIR="$HOME/bin"
             BUILDPACK_PROJECTS="$HOME/buildpack-repo"
 
-            echo "## Start :: Echo foo, bar env var"
-            echo $FOO, $BAR
-            echo "## End :: Echo foo, bar env var"
-
             mkdir -p ${TEMP_DIR}
             mkdir -p ${USER_BIN_DIR}
             mkdir -p ${BUILDPACK_PROJECTS}
@@ -304,7 +296,6 @@ spec:
             #  echo "arg: $arg"
             #done
 
-            set -o verbose
             # export DOCKER_HOST=tcp://${HOST_IP}:2376
 
             for build_arg in "${BUILD_ARGS[@]}"; do
@@ -316,7 +307,8 @@ spec:
             echo "## End :: Echo args to be passed to pack"
 
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-            pack builder create ${IMAGE} --config builder.toml "${PACK_ARGS}"
+            echo "pack builder create ${IMAGE} --config builder.toml ${PACK_ARGS}"
+            pack builder create ${IMAGE} --config builder.toml ${PACK_ARGS}
 
             container=$(podman create ${IMAGE})
             echo "Container: $container"
@@ -324,8 +316,10 @@ spec:
             touch ${HOME}/shared/container_path
             podman unshare
             podman mount $container | tee ${HOME}/shared/container_path
+
             # delete symlinks - they may point outside the container rootfs, messing with SBOM scanners
             find $(cat ${HOME}/shared/container_path) -xtype l -delete
+
             echo $container > ${HOME}/shared/container_name
 
             podman push "$IMAGE" "oci:konflux-final-image:$IMAGE"
@@ -337,7 +331,6 @@ spec:
 
             echo "## Show ${HOME}/shared/container_name"
             cat ${HOME}/shared/container_name
-            set +o verbose
 
             REMOTESSHEOF
             chmod +x scripts/script-build.sh

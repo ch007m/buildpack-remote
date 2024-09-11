@@ -162,7 +162,10 @@ spec:
           name: "IMAGE_DIGEST"
         - description: "Digests of the base images used for build"
           name: "BASE_IMAGES_DIGESTS"
-        stepTemplate: {}
+        stepTemplate:
+          env:
+          - name: "FOO"
+            value: "bar"
         steps:
         - args:
           - "$(params.BUILD_ARGS)"
@@ -202,6 +205,10 @@ spec:
             echo "rsync shared folders ..."
             rsync -ra "/shared/" "$SSH_HOST:$BUILD_DIR/volumes/shared/"
             rsync -ra "/tekton/results/" "$SSH_HOST:$BUILD_DIR/results/"
+
+            echo "## Start :: Echo Foo env var"
+            echo $FOO
+            echo "## End :: Echo Foo env var"
 
             cat >scripts/script-build.sh <<'REMOTESSHEOF'
             #!/bin/sh

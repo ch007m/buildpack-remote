@@ -302,8 +302,13 @@ spec:
             echo $container > ${HOME}/shared/container_name
 
             podman push "$IMAGE" "oci:konflux-final-image:$IMAGE"
+            echo "## List konflux-final-image"
             ls -la konflux-final-image
+
+            echo "## List ${HOME}/shared/container_path"
             ls -la ${HOME}/shared/container_path
+
+            echo "## Show ${HOME}/shared/container_name"
             cat ${HOME}/shared/container_name
 
             #container=$(buildah from --pull-never $IMAGE)

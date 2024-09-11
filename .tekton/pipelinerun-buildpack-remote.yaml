@@ -310,10 +310,6 @@ spec:
 
             echo "## Show ${HOME}/shared/container_name"
             cat ${HOME}/shared/container_name
-
-            #container=$(buildah from --pull-never $IMAGE)
-            #buildah mount $container | tee /shared/container_path
-            #buildah push "$IMAGE" "oci:konflux-final-image:$IMAGE"
             set +o verbose
 
             REMOTESSHEOF
@@ -322,14 +318,15 @@ spec:
             rsync -ra scripts "$SSH_HOST:$BUILD_DIR"
             rsync -ra "$HOME/.docker/" "$SSH_HOST:$BUILD_DIR/.docker/"
 
+            #FOO=${FOO} BAR=${BAR} ssh $SSH_ARGS "$SSH_HOST" "bash -s" <scripts/script-build.sh
+            ssh $SSH_ARGS "$SSH_HOST" "FOO=${FOO} BAR=${BAR} scripts/script-build.sh"
+
             # DON'T WORK AS PACK CANNOT ACCESS DOCKER HOST
             # ssh $SSH_ARGS "$SSH_HOST" $PORT_FORWARD podman run $PODMAN_PORT_FORWARD \
             #    -v "$BUILD_DIR/scripts:/scripts:Z" \
             #    -v "$BUILD_DIR/.docker/:/root/.docker:Z" \
             #    -v "$BUILD_DIR/volumes/shared:/shared:Z" \
             #    --user=0 --rm "$BUILDER_IMAGE" /scripts/script-build.sh
-
-            ssh $SSH_ARGS "$SSH_HOST" "FOO=${FOO} BAR=${BAR} scripts/script-build.sh"
 
             echo -n "URL of the image build is : quarkus-hello:1.0" | tee "$(results.IMAGE_URL.path)"
             echo -n "sha256ddddddddddddddddddddd" | tee "$(results.IMAGE_DIGEST.path)"

@@ -339,13 +339,13 @@ spec:
 
             ssh $SSH_ARGS "$SSH_HOST" \
               "FOO=$FOO
-               BAR=$BAR
-               BUILDER_IMAGE=$BUILDER_IMAGE
-               PLATFORM=$PLATFORM
-               IMAGE=$IMAGE
-               PACK_CLI_VERSION=$PACK_CLI_VERSION
-               GO_VERSION=$GO_VERSION
-               BUILD_ARGS=$BUILD_ARGS
+                BAR=$BAR
+                BUILDER_IMAGE=$BUILDER_IMAGE
+                PLATFORM=$PLATFORM
+                IMAGE=$IMAGE
+                PACK_CLI_VERSION=$PACK_CLI_VERSION
+                GO_VERSION=$GO_VERSION
+                BUILD_ARGS=$BUILD_ARGS
                scripts/script-build.sh"
 
             # DON'T WORK AS PACK CANNOT ACCESS DOCKER HOST

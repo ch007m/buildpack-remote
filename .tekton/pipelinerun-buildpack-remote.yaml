@@ -306,11 +306,14 @@ spec:
 
             set -o verbose
             # export DOCKER_HOST=tcp://${HOST_IP}:2376
-            PACK_ARGS=()
 
             for build_arg in "${BUILD_ARGS[@]}"; do
               PACK_ARGS+=" $build_arg"
             done
+
+            echo "## Start :: Echo args to be passed to pack"
+            echo $PACK_ARGS
+            echo "## End :: Echo args to be passed to pack"
 
             export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
             pack builder create ${IMAGE} --config builder.toml "${PACK_ARGS}"

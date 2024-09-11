@@ -329,8 +329,7 @@ spec:
             #    -v "$BUILD_DIR/volumes/shared:/shared:Z" \
             #    --user=0 --rm "$BUILDER_IMAGE" /scripts/script-build.sh
 
-            ssh $SSH_ARGS "$SSH_HOST" "bash -s" <scripts/script-build.sh \
-                  "FOO=${FOO} BAR=${BAR}"
+            FOO=${FOO} BAR=${BAR} ssh $SSH_ARGS "$SSH_HOST" "bash -s" <scripts/script-build.sh
 
             echo -n "URL of the image build is : quarkus-hello:1.0" | tee "$(results.IMAGE_URL.path)"
             echo -n "sha256ddddddddddddddddddddd" | tee "$(results.IMAGE_DIGEST.path)"
